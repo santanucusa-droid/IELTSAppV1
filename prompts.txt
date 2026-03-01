@@ -1,0 +1,20 @@
+## PROMPT1
+create a text for a 3 minutes listening task in the level of IELTS exam about the following topic. just give me a block of text and nothing else. MAKE SURE ITS ONLY 3 minutes long. The topic is "YOUR TOPIC"
+
+
+
+
+## PROMPT2
+make 6 mcq questions on this topic which an user will be presented with to answer them. make the correct option suffixed by an asterisk. Use the following format:
+1. What is the capital of France?
+A) London
+B) Berlin
+C) Paris*
+D) Madrid
+
+2. Which planet is known as the Red Planet?
+A) Venus
+B) Mars*
+C) Jupiter
+D) Saturn
+
