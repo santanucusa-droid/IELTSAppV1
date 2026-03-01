@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Result — {{ test.title }}{% endblock %}
+{% block head %}
+<style>
+.score-hero {
+  background: linear-gradient(135deg, #1a6bff 0%, #0d4fd6 100%);
+  border-radius: var(--radius); color: white; padding: 2.5rem; text-align: center; margin-bottom: 1.5rem;
+}
+.score-big { font-size: 4rem; font-weight: 800; letter-spacing: -.05em; line-height: 1; }
+.score-label { font-size: .9rem; opacity: .8; margin-top: .3rem; }
+.pct-ring { font-size: 1.1rem; font-weight: 700; opacity: .9; margin-top: .5rem; }
+.q-result { border-radius: var(--radius-sm); padding: 1rem 1.25rem; margin-bottom: .75rem; border: 1px solid; }
+.q-result.correct { background: #ecfdf3; border-color: #abefc6; }
+.q-result.wrong { background: #fff1f3; border-color: #fecdd6; }
+.q-result.skipped { background: var(--surface-2); border-color: var(--border); }
+.opt-row { font-size: .875rem; display: flex; align-items: center; gap: .4rem; margin-top: .2rem; }
+.badge-opt { display: inline-flex; align-items: center; gap: .25rem; padding: .2rem .55rem; border-radius: 6px; font-size: .75rem; font-weight: 600; }
+.badge-correct { background: #ecfdf3; color: #067647; border: 1px solid #abefc6; }
+.badge-wrong { background: #fff1f3; color: #b42318; border: 1px solid #fecdd6; }
+.badge-neutral { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container" style="max-width: 700px">
+  <div class="score-hero">
+    <div style="font-size:.8rem; text-transform:uppercase; letter-spacing:.1em; opacity:.7; margin-bottom:.75rem">
+      {{ test.title }}
+    </div>
+    <div class="score-big">{{ attempt.score }} <span style="opacity:.5;font-size:2.5rem">/ {{ attempt.total }}</span></div>
+    <div class="score-label">Questions Correct</div>
+    <div class="pct-ring">
+      {% set pct = (attempt.score / attempt.total * 100)|round|int if attempt.total > 0 else 0 %}
+      {{ pct }}% Score
+    </div>
+    <div style="font-size:.78rem; opacity:.65; margin-top:.75rem">
+      Submitted {{ attempt.submitted_at }}
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="mb-0 fw-600" style="font-size:.85rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.06em">Answer Review</h6>
+    <a href="/dashboard" class="btn btn-sm btn-outline-primary">
+      <i class="bi bi-arrow-left"></i> Back to Tests
+    </a>
+  </div>
+
+  {% for q in q_results %}
+  {% set is_correct = q.user is not none and q.user == q.correct %}
+  {% set is_skipped = q.user is none %}
+  <div class="q-result {% if is_correct %}correct{% elif is_skipped %}skipped{% else %}wrong{% endif %}">
+    <div style="font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color: var(--text-muted); margin-bottom:.35rem">
+      Q{{ loop.index }} &nbsp;·&nbsp;
+      {% if is_correct %}<span style="color:#067647">✓ Correct</span>
+      {% elif is_skipped %}<span style="color:var(--text-muted)">— Not answered</span>
+      {% else %}<span style="color:#b42318">✗ Incorrect</span>{% endif %}
+    </div>
+    <div style="font-weight:500; font-size:.9rem; margin-bottom:.6rem">{{ q.text }}</div>
+    <div class="d-flex flex-wrap gap-2">
+      {% for opt in q.options %}
+      <span class="badge-opt {% if loop.index0 == q.correct %}badge-correct{% elif q.user is not none and loop.index0 == q.user and not is_correct %}badge-wrong{% else %}badge-neutral{% endif %}">
+        {% if loop.index0 == q.correct %}<i class="bi bi-check-circle-fill"></i>{% elif q.user is not none and loop.index0 == q.user %}<i class="bi bi-x-circle-fill"></i>{% else %}<i class="bi bi-circle"></i>{% endif %}
+        {{ opt }}
+      </span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="text-center mt-4 mb-5">
+    <a href="/dashboard" class="btn btn-primary px-4"><i class="bi bi-grid"></i> All Tests</a>
+  </div>
+</div>
+{% endblock %}

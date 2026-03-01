@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ user.email }} — IELTSLift{% endblock %}
+{% block content %}
+<div class="container" style="max-width:800px">
+  <div class="mb-4">
+    <a href="/admin/users" class="btn btn-sm btn-light border mb-3"><i class="bi bi-arrow-left"></i> Users</a>
+    <div class="page-title">{{ user.email }}</div>
+    <div class="page-sub">Joined {{ user.created_at[:10] }}</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><i class="bi bi-clipboard-data me-2 text-brand"></i>Test Attempts</div>
+    {% if attempts %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead><tr>
+          <th>Test</th><th>Score</th><th>%</th><th>Submitted</th><th></th>
+        </tr></thead>
+        <tbody>
+        {% for a in attempts %}
+        {% set pct = (a.score / a.total * 100)|round|int if a.total > 0 else 0 %}
+        <tr>
+          <td><span class="fw-500">{{ a.title }}</span></td>
+          <td>{{ a.score }} / {{ a.total }}</td>
+          <td>
+            <span class="badge {% if pct >= 70 %}bg-success{% elif pct >= 40 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+              {{ pct }}%
+            </span>
+          </td>
+          <td style="color:var(--text-secondary)">{{ a.submitted_at[:16] }}</td>
+          <td class="text-end">
+            <a href="/result/{{ a.id }}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i> Review
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-secondary">This user hasn't attempted any tests yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

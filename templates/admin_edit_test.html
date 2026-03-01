@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Edit Test — IELTSLift{% endblock %}
+{% block content %}
+<div class="container" style="max-width:900px">
+  <div class="mb-4">
+    <a href="/admin" class="btn btn-sm btn-light border mb-3"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+    <div class="page-title">{{ test.title }}</div>
+    <div class="page-sub">
+      <span class="chip"><i class="bi bi-clock"></i> {{ test.time_limit }} min</span>
+      <span class="chip"><i class="bi bi-music-note"></i> {{ test.audio_file }}</span>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Left: Questions List -->
+    <div class="col-md-7">
+      <div class="card">
+        <div class="card-header">
+          <i class="bi bi-list-ol me-2"></i>Questions ({{ questions|length }})
+        </div>
+        <div class="p-3">
+          {% if questions %}
+          {% for q in questions %}
+          <div class="card mb-2 p-3" style="background:var(--surface-2); border:1px solid var(--border)">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge bg-primary">Q{{ loop.index }}</span>
+              <form method="POST" style="display:inline" onsubmit="return confirm('Delete this question?')">
+                <input type="hidden" name="action" value="delete_question"/>
+                <input type="hidden" name="question_id" value="{{ q.id }}"/>
+                <button type="submit" class="btn btn-sm btn-outline-danger" style="padding:.15rem .4rem; font-size:.75rem">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+            <div class="fw-500 mb-2" style="font-size:.9rem">{{ q.question_text }}</div>
+            {% set opts = q.options|from_json %}
+            {% for opt in opts %}
+            <div style="font-size:.85rem; padding:.2rem 0; color:var(--text-secondary)">
+              {% if loop.index0 == q.correct_option %}
+              <i class="bi bi-check-circle-fill text-success"></i>
+              {% else %}
+              <i class="bi bi-circle"></i>
+              {% endif %}
+              {{ opt }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-4 text-secondary" style="font-size:.9rem">
+            No questions yet. Add questions using the forms on the right.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Add Questions -->
+    <div class="col-md-5">
+      <!-- Bulk Import -->
+      <div class="card mb-3">
+        <div class="card-header" style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#bulkImport">
+          <i class="bi bi-file-earmark-text me-2"></i>Bulk Import
+          <i class="bi bi-chevron-down float-end"></i>
+        </div>
+        <div class="collapse" id="bulkImport">
+          <div class="p-3">
+            <div class="alert alert-info py-2 px-3 mb-3" style="font-size:.8rem; border-radius:8px">
+              <strong>Format:</strong> Paste questions in markdown format below
+            </div>
+            <form method="POST" id="bulkForm">
+              <input type="hidden" name="action" value="bulk_import"/>
+              <textarea name="bulk_text" class="form-control mb-2" rows="12" placeholder="1. What is the capital of France?
+A) London
+B) Berlin
+C) Paris*
+D) Madrid
+
+2. Which planet is known as the Red Planet?
+A) Venus
+B) Mars*
+C) Jupiter
+D) Saturn" style="font-family:monospace; font-size:.85rem"></textarea>
+              <div class="form-text mb-3" style="font-size:.75rem">
+                Mark correct answer with * (e.g., C) Paris*)
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm w-100">
+                <i class="bi bi-upload"></i> Import Questions
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single Question -->
+      <div class="card">
+        <div class="card-header" style="cursor:pointer" data-bs-toggle="collapse" data-bs-target="#singleQuestion">
+          <i class="bi bi-plus-circle me-2"></i>Add Single Question
+          <i class="bi bi-chevron-down float-end"></i>
+        </div>
+        <div class="collapse show" id="singleQuestion">
+          <div class="p-3">
+            <form method="POST">
+              <input type="hidden" name="action" value="add_question"/>
+              <div class="mb-3">
+                <label style="font-size:.85rem">Question Text</label>
+                <textarea name="question_text" class="form-control" rows="2" required></textarea>
+              </div>
+              <div class="mb-2">
+                <label style="font-size:.85rem">Options</label>
+                <input type="text" name="opt0" class="form-control form-control-sm mb-1" placeholder="Option A" required/>
+                <input type="text" name="opt1" class="form-control form-control-sm mb-1" placeholder="Option B" required/>
+                <input type="text" name="opt2" class="form-control form-control-sm mb-1" placeholder="Option C" required/>
+                <input type="text" name="opt3" class="form-control form-control-sm mb-1" placeholder="Option D" required/>
+              </div>
+              <div class="mb-3">
+                <label style="font-size:.85rem">Correct Answer</label>
+                <select name="correct" class="form-select form-select-sm" required>
+                  <option value="0">A</option>
+                  <option value="1">B</option>
+                  <option value="2">C</option>
+                  <option value="3">D</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm w-100">
+                <i class="bi bi-plus"></i> Add Question
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

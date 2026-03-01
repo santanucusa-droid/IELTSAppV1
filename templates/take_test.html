@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+{% block title %}{{ test.title }} — IELTSLift{% endblock %}
+{% block head %}
+<style>
+body { background: var(--surface-2); }
+.test-layout { display: grid; grid-template-columns: 1fr 360px; gap: 1.5rem; max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+@media (max-width: 900px) { .test-layout { grid-template-columns: 1fr; } }
+
+/* Timer */
+.timer-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem; position: sticky; top: 72px;
+  box-shadow: var(--shadow-sm);
+}
+.timer-display {
+  font-family: 'DM Mono', monospace; font-size: 2.4rem; font-weight: 500;
+  color: var(--text-primary); letter-spacing: .05em; line-height: 1;
+}
+.timer-display.warning { color: var(--warning); }
+.timer-display.danger { color: var(--danger); animation: pulse .8s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+/* Audio */
+.audio-section {
+  background: linear-gradient(135deg, #1a6bff 0%, #0d4fd6 100%);
+  border-radius: var(--radius); padding: 1.5rem;
+  color: white; margin-bottom: 1.5rem;
+}
+.audio-section h6 { opacity: .8; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem; }
+.audio-section .test-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+.audio-status {
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1rem; background: rgba(255,255,255,.1); border-radius: 8px;
+  font-size: .9rem;
+}
+.audio-status .spinner-border { width: 1.2rem; height: 1.2rem; border-width: 2px; }
+audio { display: none; }
+
+/* Questions */
+.q-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.25rem; margin-bottom: .75rem;
+  transition: border .15s;
+}
+.q-card.answered { border-color: #abefc6; }
+.q-num { font-size: .75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .5rem; }
+.q-text { font-weight: 500; font-size: .95rem; margin-bottom: .9rem; }
+.option-label {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .5rem .75rem; border-radius: 8px; cursor: pointer;
+  transition: background .1s; font-size: .9rem;
+}
+.option-label:hover { background: var(--surface-2); }
+.option-label input { margin-top: 3px; accent-color: var(--brand); flex-shrink: 0; }
+
+/* Progress */
+.progress-pills { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .75rem; }
+.pill {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 600; cursor: pointer;
+  background: var(--surface-2); color: var(--text-muted);
+  border: 1px solid var(--border); transition: all .1s;
+}
+.pill.done { background: #ecfdf3; border-color: #abefc6; color: #067647; }
+.pill:hover { border-color: var(--brand); color: var(--brand); }
+
+/* Submit */
+.submit-section { margin-top: 1.5rem; }
+
+/* Alert overlay */
+#confirm-modal .modal-content { border-radius: var(--radius); border: none; box-shadow: var(--shadow-md); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="test-layout">
+
+    <!-- Left: audio + questions -->
+    <div>
+      <div class="audio-section">
+        <h6>Now Playing</h6>
+        <div class="test-title">{{ test.title }}</div>
+        <audio id="audio-player">
+          <source src="/static/uploads/{{ test.audio_file }}" type="audio/mpeg"/>
+          <source src="/static/uploads/{{ test.audio_file }}" type="audio/ogg"/>
+          Your browser does not support audio.
+        </audio>
+        <div class="audio-status" id="audio-status" style="display:none;">
+          <div class="spinner-border text-light" role="status"></div>
+          <span id="audio-text">Audio is playing...</span>
+        </div>
+        <div id="audio-waiting" style="padding: 1rem; background: rgba(255,255,255,.1); border-radius: 8px; font-size: .9rem; text-align: center;">
+          <i class="bi bi-info-circle"></i> Click "Start Test" to begin
+        </div>
+      </div>
+
+      <h6 class="fw-600 mb-3" style="font-size:.85rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.06em">
+        Question <span id="current-q-num">1</span> of {{ questions|length }}
+      </h6>
+
+      <div id="questions-container">
+        {% for q in questions %}
+        <div class="q-card" id="qcard-{{ loop.index }}" data-qindex="{{ loop.index }}" style="display: {% if loop.index == 1 %}block{% else %}none{% endif %};">
+          <div class="q-num">Question {{ loop.index }}</div>
+          <div class="q-text">{{ q.text }}</div>
+          {% for opt in q.options %}
+          <label class="option-label">
+            <input type="radio" name="q{{ q.id }}" value="{{ loop.index0 }}"
+              data-qid="{{ q.id }}" data-qnum="{{ loop.index0 + (loop.revindex - loop.revindex) }}"
+              onchange="markAnswered({{ q.id }}, {{ loop.index - 1 }})"/>
+            <span>{{ opt }}</span>
+          </label>
+          {% endfor %}
+          
+          <div class="d-flex gap-2 mt-4">
+            {% if loop.index > 1 %}
+            <button class="btn btn-outline-secondary" onclick="previousQuestion()">
+              <i class="bi bi-arrow-left"></i> Previous
+            </button>
+            {% endif %}
+            {% if loop.index < questions|length %}
+            <button class="btn btn-primary" onclick="nextQuestion()">
+              Next <i class="bi bi-arrow-right"></i>
+            </button>
+            {% else %}
+            <button class="btn btn-success" onclick="confirmSubmit()">
+              <i class="bi bi-check2-circle"></i> Submit Test
+            </button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right: timer + progress -->
+    <div>
+      <div class="timer-box">
+        <div style="font-size:.75rem; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:.4rem">
+          <i class="bi bi-clock"></i> Time Remaining
+        </div>
+        <div class="timer-display" id="timer">{{ "%02d"|format(test.time_limit) }}:00</div>
+        <div class="mt-3" style="font-size:.8rem; color:var(--text-secondary)">
+          Answered: <strong id="answered-count">0</strong> / {{ questions|length }}
+        </div>
+        <div class="progress mt-2" style="height:6px; border-radius:99px">
+          <div class="progress-bar" id="progress-bar" role="progressbar" style="width:0%; background:var(--brand); border-radius:99px"></div>
+        </div>
+        <hr class="my-3"/>
+        <div style="font-size:.78rem; font-weight:600; color:var(--text-muted); margin-bottom:.5rem">Question Progress</div>
+        <div class="progress-pills" id="pills">
+          {% for q in questions %}
+          <div class="pill" id="pill-{{ loop.index0 }}" onclick="scrollToQ({{ loop.index }})">{{ loop.index }}</div>
+          {% endfor %}
+        </div>
+        <div class="submit-section">
+          <button class="btn btn-primary w-100" onclick="confirmSubmit()">
+            <i class="bi bi-send"></i> Submit Test
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:400px" id="confirm-modal">
+    <div class="modal-content p-4">
+      <h5 class="fw-700 mb-2" id="modal-title" style="font-weight:700">Submit Test?</h5>
+      <p class="text-secondary mb-4" id="modal-body" style="font-size:.9rem">
+        Once submitted you cannot change your answers. Are you sure?
+      </p>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary flex-fill" onclick="doSubmit()" id="modal-confirm-btn">Submit</button>
+        <button class="btn btn-light flex-fill" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Time up modal -->
+<div class="modal fade" id="timeupModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
+    <div class="modal-content p-4 text-center">
+      <div class="mb-3" style="font-size:3rem">⏰</div>
+      <h5 style="font-weight:700">Time's Up!</h5>
+      <p class="text-secondary" style="font-size:.9rem">Your test is being submitted automatically with your current answers.</p>
+      <div class="spinner-border text-primary mt-2" role="status"><span class="visually-hidden">Loading...</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Test rules modal -->
+<div class="modal fade" id="rulesModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:500px">
+    <div class="modal-content p-4">
+      <div class="text-center mb-3">
+        <div style="font-size:3rem">📋</div>
+        <h5 style="font-weight:700; margin-top:.5rem">Test Instructions</h5>
+      </div>
+      <div style="font-size:.9rem; color:var(--text-secondary); line-height:1.6">
+        <p><strong>Please read carefully before starting:</strong></p>
+        <ul style="padding-left:1.5rem">
+          <li>The audio will play automatically once you start the test</li>
+          <li>You can only listen to the audio once</li>
+          <li>The timer will start when the audio begins playing</li>
+          <li>You have <strong>{{ test.time_limit }} minutes</strong> to complete all questions</li>
+          <li>Answer all questions before time runs out</li>
+          <li>Once submitted, you cannot change your answers</li>
+        </ul>
+        <p class="mb-0 mt-3"><strong>Good luck!</strong></p>
+      </div>
+      <button class="btn btn-primary w-100 mt-3" onclick="startTest()">
+        <i class="bi bi-play-circle"></i> Start Test
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIME_LIMIT = {{ test.time_limit }} * 60;
+const TEST_ID = {{ test.id }};
+const TOTAL_Q = {{ questions|length }};
+let startedAt = Date.now();
+let answered = {};
+let submitted = false;
+let timerInterval;
+let timerStarted = false;
+
+// ── Audio
+const audio = document.getElementById('audio-player');
+
+audio.addEventListener('play', function() {
+  if (!timerStarted) {
+    startedAt = Date.now();
+    startTimer();
+    timerStarted = true;
+  }
+  document.getElementById('audio-text').textContent = 'Audio is playing...';
+});
+
+audio.addEventListener('ended', function() {
+  document.getElementById('audio-text').innerHTML = '<i class="bi bi-check-circle"></i> Audio finished';
+  document.querySelector('.audio-status .spinner-border').style.display = 'none';
+});
+
+audio.addEventListener('error', function() {
+  document.getElementById('audio-text').innerHTML = '<i class="bi bi-exclamation-circle"></i> Audio error';
+  document.querySelector('.audio-status .spinner-border').style.display = 'none';
+});
+
+// ── Timer
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+function startTimer() {
+  let remaining = TIME_LIMIT;
+  timerInterval = setInterval(function() {
+    remaining--;
+    const el = document.getElementById('timer');
+    el.textContent = formatTime(remaining);
+    el.className = 'timer-display';
+    if (remaining <= 60) el.classList.add('danger');
+    else if (remaining <= 180) el.classList.add('warning');
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      autoSubmit();
+    }
+  }, 1000);
+}
+
+function startTest() {
+  const modal = bootstrap.Modal.getInstance(document.getElementById('rulesModal'));
+  if (modal) modal.hide();
+  
+  // Show audio status and hide waiting message
+  document.getElementById('audio-waiting').style.display = 'none';
+  document.getElementById('audio-status').style.display = 'flex';
+  
+  // Play audio
+  audio.play().catch(function(error) {
+    console.error('Audio play error:', error);
+    document.getElementById('audio-text').innerHTML = '<i class="bi bi-exclamation-circle"></i> Audio failed to play';
+    document.querySelector('.audio-status .spinner-border').style.display = 'none';
+  });
+}
+
+function autoSubmit() {
+  new bootstrap.Modal(document.getElementById('timeupModal')).show();
+  setTimeout(doSubmit, 2000);
+}
+
+// ── Answers
+function markAnswered(qid, qnum) {
+  const radios = document.querySelectorAll('input[name="q' + qid + '"]');
+  let selected = null;
+  radios.forEach(function(radio) {
+    if (radio.checked) selected = parseInt(radio.value);
+  });
+  
+  if (selected !== null) {
+    answered[qid] = selected;
+    
+    // Mark the card as answered
+    const cards = document.querySelectorAll('[id^="qcard-"]');
+    cards.forEach(function(card) {
+      const inputs = card.querySelectorAll('input[data-qid="' + qid + '"]');
+      if (inputs.length > 0) {
+        card.classList.add('answered');
+      }
+    });
+    
+    // Mark pill as done
+    const allQIds = getAllQIds();
+    const idx = allQIds.indexOf(String(qid));
+    if (idx >= 0) {
+      const pill = document.getElementById('pill-' + idx);
+      if (pill) pill.classList.add('done');
+    }
+    
+    updateProgress();
+  }
+}
+
+function getAllQIds() {
+  const radios = document.querySelectorAll('input[type="radio"]');
+  const qids = [];
+  radios.forEach(function(radio) {
+    const qid = String(radio.getAttribute('data-qid'));
+    if (!qids.includes(qid)) qids.push(qid);
+  });
+  return qids;
+}
+
+function updateProgress() {
+  const n = Object.keys(answered).length;
+  document.getElementById('answered-count').textContent = n;
+  const pct = (n / TOTAL_Q * 100).toFixed(0);
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function scrollToQ(num) {
+  showQuestion(num);
+}
+
+// ── Navigation
+let currentQuestion = 1;
+
+function showQuestion(num) {
+  // Hide all questions
+  const allCards = document.querySelectorAll('[id^="qcard-"]');
+  allCards.forEach(function(card) {
+    card.style.display = 'none';
+  });
+  
+  // Show the requested question
+  const targetCard = document.getElementById('qcard-' + num);
+  if (targetCard) {
+    targetCard.style.display = 'block';
+    currentQuestion = num;
+    targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function nextQuestion() {
+  if (currentQuestion < TOTAL_Q) {
+    showQuestion(currentQuestion + 1);
+  }
+}
+
+function previousQuestion() {
+  if (currentQuestion > 1) {
+    showQuestion(currentQuestion - 1);
+  }
+}
+
+
+// ── Submit
+function confirmSubmit() {
+  if (submitted) return;
+  const unanswered = TOTAL_Q - Object.keys(answered).length;
+  const title = document.getElementById('modal-title');
+  const body = document.getElementById('modal-body');
+  if (unanswered > 0) {
+    title.textContent = 'Submit with unanswered questions?';
+    body.textContent = unanswered + ' question(s) are unanswered. You can\'t change your answers after submission.';
+  } else {
+    title.textContent = 'Submit Test?';
+    body.textContent = 'All questions answered. Once submitted you cannot change your answers.';
+  }
+  new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+
+function goBack() {
+  if (submitted) return;
+  if (Object.keys(answered).length === 0) {
+    window.location.href = '/dashboard';
+    return;
+  }
+  if (confirm('Go back? Your answers will be saved and submitted.')) {
+    doSubmit();
+  }
+}
+
+function doSubmit() {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerInterval);
+  const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+  if (confirmModal) confirmModal.hide();
+
+  fetch('/test/' + TEST_ID + '/submit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ answers: answered, started_at: startedAt })
+  })
+  .then(function(response) { return response.json(); })
+  .then(function(res) {
+    window.location.href = res.redirect;
+  })
+  .catch(function() {
+    alert('Submission failed. Please try again.');
+    submitted = false;
+  });
+}
+
+// Show rules modal on page load
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    const rulesModalEl = document.getElementById('rulesModal');
+    if (rulesModalEl) {
+      const rulesModal = new bootstrap.Modal(rulesModalEl, {
+        backdrop: 'static',
+        keyboard: false
+      });
+      rulesModal.show();
+    }
+  }, 100);
+});
+</script>
+{% endblock %}

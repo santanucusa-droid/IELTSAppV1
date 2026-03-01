@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Register — IELTSLift{% endblock %}
+{% block head %}
+<style>
+body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%); }
+.auth-wrap { width: 100%; max-width: 420px; padding: 1rem; }
+.auth-logo { font-size: 1.6rem; font-weight: 800; color: var(--brand); letter-spacing: -.5px; margin-bottom: .25rem; }
+.auth-logo span { color: var(--text-primary); }
+.auth-tagline { color: var(--text-secondary); font-size: .9rem; margin-bottom: 2rem; }
+.auth-card { padding: 2rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="text-center">
+    <div class="auth-logo"><i class="bi bi-headphones"></i> IELTS<span>Lift</span></div>
+    <div class="auth-tagline">Start your IELTS journey today.</div>
+  </div>
+  <div class="card auth-card">
+    <h5 style="font-weight:700" class="mb-1">Create account</h5>
+    <p class="text-secondary mb-3" style="font-size:.85rem">Free to sign up and start practising</p>
+    {% if error %}
+    <div class="alert alert-danger py-2 px-3" style="font-size:.85rem; border-radius:8px">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+      <div class="mb-3">
+        <label>Email address</label>
+        <input type="email" name="email" class="form-control" placeholder="you@email.com" required autofocus/>
+      </div>
+      <div class="mb-4">
+        <label>Password <span class="text-muted fw-normal">(min. 6 chars)</span></label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Create Account</button>
+    </form>
+    <hr class="my-3"/>
+    <a href="/login" class="btn btn-light w-100" style="border: 1px solid var(--border)">Already have an account? Log in</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Log In — IELTSLift{% endblock %}
+{% block head %}
+<style>
+body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%); }
+.auth-wrap { width: 100%; max-width: 420px; padding: 1rem; }
+.auth-logo { font-size: 1.6rem; font-weight: 800; color: var(--brand); letter-spacing: -.5px; margin-bottom: .25rem; }
+.auth-logo span { color: var(--text-primary); }
+.auth-tagline { color: var(--text-secondary); font-size: .9rem; margin-bottom: 2rem; }
+.auth-card { padding: 2rem; }
+.divider-text { position: relative; text-align: center; color: var(--text-muted); font-size: .8rem; margin: 1.2rem 0; }
+.divider-text::before { content: ''; position: absolute; left: 0; top: 50%; width: 42%; height: 1px; background: var(--border); }
+.divider-text::after { content: ''; position: absolute; right: 0; top: 50%; width: 42%; height: 1px; background: var(--border); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="text-center">
+    <div class="auth-logo"><i class="bi bi-headphones"></i> IELTS<span>Lift</span></div>
+    <div class="auth-tagline">Listening practice, on your terms.</div>
+  </div>
+  <div class="card auth-card">
+    <h5 class="fw-700 mb-1" style="font-weight:700">Welcome back</h5>
+    <p class="text-secondary mb-3" style="font-size:.85rem">Log in to continue your practice</p>
+    {% if error %}
+    <div class="alert alert-danger py-2 px-3" style="font-size:.85rem; border-radius:8px">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+      <div class="mb-3">
+        <label>Email address</label>
+        <input type="email" name="email" class="form-control" placeholder="you@email.com" required autofocus/>
+      </div>
+      <div class="mb-4">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Log In</button>
+    </form>
+    <div class="divider-text">or</div>
+    <a href="/register" class="btn btn-light w-100" style="border: 1px solid var(--border)">Create an account</a>
+  </div>
+  <p class="text-center mt-3" style="font-size:.78rem; color: var(--text-muted)">
+    Admin? Log in with <strong>admin@ielts.com</strong> / <strong>admin123</strong>
+  </p>
+</div>
+{% endblock %}

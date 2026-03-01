@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}New Test — IELTSLift{% endblock %}
+{% block content %}
+<div class="container" style="max-width:620px">
+  <div class="mb-4">
+    <a href="/admin" class="btn btn-sm btn-light border mb-3"><i class="bi bi-arrow-left"></i> Back</a>
+    <div class="page-title">Create New Test</div>
+    <div class="page-sub">Upload an audio file and set a time limit. You can add questions after creating the test.</div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-danger py-2 px-3 mb-3" style="font-size:.85rem; border-radius:8px">{{ error }}</div>
+  {% endif %}
+
+  <div class="card p-4">
+    <form method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label>Test Title</label>
+        <input type="text" name="title" class="form-control" placeholder="e.g. IELTS Listening Practice Test 1" required/>
+      </div>
+      <div class="mb-3">
+        <label>Audio File <span class="text-muted fw-normal">(MP3, WAV, OGG)</span></label>
+        <input type="file" name="audio" class="form-control" accept="audio/*" required/>
+        <div class="form-text">Students will be able to listen to this once during the test.</div>
+      </div>
+      <div class="mb-4">
+        <label>Time Limit <span class="text-muted fw-normal">(minutes)</span></label>
+        <input type="number" name="time_limit" class="form-control" value="30" min="1" max="180" required/>
+        <div class="form-text">Students must complete all questions within this time.</div>
+      </div>
+      <button type="submit" class="btn btn-primary px-4">
+        <i class="bi bi-arrow-right"></i> Create & Add Questions
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
