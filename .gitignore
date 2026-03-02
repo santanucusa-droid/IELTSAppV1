@@ -10,3 +10,4 @@ ENV/
 .DS_Store
 .env
 .vscode
+*.db
