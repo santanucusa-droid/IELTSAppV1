@@ -232,7 +232,16 @@ let timerStarted = false;
 // ── Audio
 const audio = document.getElementById('audio-player');
 
+// Set volume to maximum and prevent any volume changes
+audio.volume = 1.0;
+audio.addEventListener('volumechange', function() {
+  if (audio.volume !== 1.0) {
+    audio.volume = 1.0;
+  }
+});
+
 audio.addEventListener('play', function() {
+  audio.volume = 1.0; // Ensure full volume on play
   if (!timerStarted) {
     startedAt = Date.now();
     startTimer();
@@ -363,6 +372,13 @@ function showQuestion(num) {
   if (targetCard) {
     targetCard.style.display = 'block';
     currentQuestion = num;
+    
+    // Update the question counter
+    const counterEl = document.getElementById('current-q-num');
+    if (counterEl) {
+      counterEl.textContent = num;
+    }
+    
     targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 }
