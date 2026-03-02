@@ -39,9 +39,7 @@ A Flask-based web application for IELTS listening test practice with audio playb
 
 4. **Access Your App**
    - Once deployed, Railway will provide a URL (e.g., `your-app.railway.app`)
-   - Default admin credentials:
-     - Email: `admin@ielts.com`
-     - Password: `admin123`
+   - Admin account is pre-configured in the database
 
 ### Alternative: Deploy via Railway CLI
 
@@ -80,7 +78,6 @@ A Flask-based web application for IELTS listening test practice with audio playb
 
 3. **Access Locally**
    - Open http://localhost:5000
-   - Login with admin credentials above
 
 ## Bulk Question Import Format
 
