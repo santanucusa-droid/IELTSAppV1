@@ -7,7 +7,6 @@ env/
 venv/
 ENV/
 .venv
-*.db
 .DS_Store
 .env
 .vscode
