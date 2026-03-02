@@ -3,24 +3,24 @@
 
 ### 1: The "Service Encounter" Prompt
 
-Generate a **dialogue** between two people regarding **<<TOPIC>>**. One speaker should be a service provider (e.g., a clerk, receptionist, or officer) and the other a customer. Ensure the conversation is heavy on **specific details** such as names, dates, addresses, and numerical figures. The tone should be polite, helpful, and functional.
+Generate a **dialogue** between two people regarding **<<TOPIC>>**. One speaker should be a service provider (e.g., a clerk, receptionist, or officer) and the other a customer. Ensure the conversation is heavy on **specific details** such as names, dates, addresses, and numerical figures. The tone should be polite, helpful, and functional. Dont add any prefix or suffix to the response.
 
 ### 2: The "Community Guide" Prompt
 
-Generate a **monologue** where a single speaker is giving a speech or a presentation about **<<TOPIC>>** to a general audience. The context should be a non-academic, community-based setting (e.g., a radio announcement, a guided tour, or an introductory talk). Use clear, instructional language and describe physical layouts or schedules.
+Generate a **monologue** where a single speaker is giving a speech or a presentation about **<<TOPIC>>** to a general audience. The context should be a non-academic, community-based setting (e.g., a radio announcement, a guided tour, or an introductory talk). Use clear, instructional language and describe physical layouts or schedules. Dont add any prefix or suffix to the response.
 
 ### 3: The "Academic Tutorial" Prompt
 
-Generate a **multi-speaker discussion** (between 2 and 4 people) regarding **<<TOPIC>>**. The setting must be a university tutorial or a study group. Include a mix of a mentor/tutor figure and students. Focus the dialogue on **opinions, disagreements, and academic planning**. The language should be semi-formal with a focus on 'why' and 'how' rather than just 'what'.
+Generate a **multi-speaker discussion** (between 2 and 4 people) regarding **<<TOPIC>>**. The setting must be a university tutorial or a study group. Include a mix of a mentor/tutor figure and students. Focus the dialogue on **opinions, disagreements, and academic planning**. The language should be semi-formal with a focus on 'why' and 'how' rather than just 'what'. Dont add any prefix or suffix to the response.
 
 ### 4: The "University Lecture" Prompt
 
-Generate a **formal academic monologue** (a lecture) on the subject of **<<TOPIC>>**. The tone should be authoritative and scholarly but accessible. Structure the text with clear **signposting language** (e.g., 'Moving on to...', 'In contrast...', 'The primary reason for...'). Use high-level vocabulary and explore the historical, scientific, or social implications of the topic.
+Generate a **formal academic monologue** (a lecture) on the subject of **<<TOPIC>>**. The tone should be authoritative and scholarly but accessible. Structure the text with clear **signposting language** (e.g., 'Moving on to...', 'In contrast...', 'The primary reason for...'). Use high-level vocabulary and explore the historical, scientific, or social implications of the topic. Dont add any prefix or suffix to the response.
 
 
 
 ## PROMPT2 [gemini.google.com]
-make 6 mcq questions on this topic which an user will be presented with to answer them. make the correct option suffixed by an asterisk. Use the following format:
+make 6 mcq questions on this topic which an user will be presented with to answer them. make the correct option suffixed by an asterisk. Use the following format and dont add any prefix or suffix to the response:
 1. What is the capital of France?
 A) London
 B) Berlin

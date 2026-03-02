@@ -119,18 +119,25 @@ def register():
         else:
             try:
                 conn = get_db()
-                cursor = conn.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hash_pw(pw)))
-                user_id = cursor.lastrowid
-                conn.commit()
-                # Auto-login after registration
-                user = conn.execute('SELECT * FROM users WHERE id=?', (user_id,)).fetchone()
-                conn.close()
-                session['user_id'] = user['id']
-                session['email'] = user['email']
-                session['is_admin'] = bool(user['is_admin'])
-                return redirect(url_for('user_dashboard'))
-            except:
-                error = 'Email already registered.'
+                # Check if email already exists
+                existing = conn.execute('SELECT * FROM users WHERE email=?', (email,)).fetchone()
+                if existing:
+                    conn.close()
+                    error = 'Email already registered.'
+                else:
+                    cursor = conn.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hash_pw(pw)))
+                    user_id = cursor.lastrowid
+                    conn.commit()
+                    # Auto-login after registration
+                    user = conn.execute('SELECT * FROM users WHERE id=?', (user_id,)).fetchone()
+                    conn.close()
+                    session['user_id'] = user['id']
+                    session['email'] = user['email']
+                    session['is_admin'] = bool(user['is_admin'])
+                    return redirect(url_for('user_dashboard'))
+            except Exception as e:
+                print(f"Registration error: {e}")
+                error = 'Registration failed. Please try again.'
     return render_template('register.html', error=error)
 
 @app.route('/logout')
