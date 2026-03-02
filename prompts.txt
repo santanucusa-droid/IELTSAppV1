@@ -1,10 +1,9 @@
-## PROMPT1
-create a text for a 3 minutes listening task in the level of IELTS exam about the following topic. just give me a block of text and nothing else. MAKE SURE ITS ONLY 3 minutes long. The topic is "YOUR TOPIC"
+## PROMPT1 [gemini.google.com] -> [elevenlabs.io]
+
+create a text for a 2 minutes long listening task in the level of IELTS exam about a topic make it around 300 words. i will genererate a speech version from the text you produce so that a human candidate can listen to it and answer a few questions. MAKE SURE IT TAKES LESS THAN OR EQUAL TO 2 minutes to speak in a normal speed of talking. For now, just give me a block of text and nothing else.  The topic is 
 
 
-
-
-## PROMPT2
+## PROMPT2 [gemini.google.com]
 make 6 mcq questions on this topic which an user will be presented with to answer them. make the correct option suffixed by an asterisk. Use the following format:
 1. What is the capital of France?
 A) London
@@ -17,4 +16,3 @@ A) Venus
 B) Mars*
 C) Jupiter
 D) Saturn
-
